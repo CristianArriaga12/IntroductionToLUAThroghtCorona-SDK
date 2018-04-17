@@ -1,4 +1,4 @@
-# LuaTutorial1
+# IntroductionToLUAThroghtCorona-SDK
 This is a simple tutorial where we learn step to step how is programming in LUA with different tools, either web or throght an development environment like we use to develop mobile apps, on a way easy and conffortable.
 
 Like first step we needed download the development environment, to this case we will teach you through the Corona-SDK development kit.
