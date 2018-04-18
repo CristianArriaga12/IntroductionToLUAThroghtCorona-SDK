@@ -1,7 +1,7 @@
   --As we told you in the Introducction of this tutorial, LUA is a imperative language and dinamically typed so we do our a first program
   --  the clasics Hello World.
 
-#phrase1="Hello World!!!!"
+# phrase1="Hello World!!!!"
   --How you can see, we don't declared type of the variable eighter put ";" but it works.
 phrase2="I'm programming";
   --Wait it, you talk was that without put the ";" it works why you put  it now.
