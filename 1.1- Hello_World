@@ -11,11 +11,11 @@ phrase2="I'm programming";
   --Simple LUA works it with or without ";".
   
 phrase3=" in 'LUA'"
-print(phrase1)
+print(phrase1 .. "\n" .. phrase2 .. phrase3)
 
-  --In lua don't exist the line break, that's why we replaced it by putting the print again.
+
   
-print(phrase2 .. phrase3)
 
-  --Why you put ".."?, Simple, in LUA the concatenation is represented by this symbol, this because LUA is a dinamically typed, i.e. 
+
+--Why you put ".."?, Simple, in LUA the concatenation is represented by this symbol, this because LUA is a dinamically typed, i.e. 
   --  phrase1 can be an int and use the "+" LUA will interpret how an add.
