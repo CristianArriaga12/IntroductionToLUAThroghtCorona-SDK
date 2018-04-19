@@ -1,11 +1,38 @@
-#Variables
+# Variables
+
 In LUA the variables is divided in two local variales and global variables,
   both can be a combination of characters while don't begin with a digit.
+  
 Other LUA's feature is that the compiler can distinguish between lowercase and uppercase,
   for example the variable x is diferent to the variable X;
-  like in the language C exist reserved words,
+  how in the language C exist reserved words,
   in LUA also exist reserved words, wich we see and talk about.
+  
 Exist diferents conventios abot the declaration of the variables, a of this conventions is that the global variables must begin by "_"
   followed by the name of the variable in uppercase, while the local variables not, but is necessary say that the local variables
   beginning ever with the reserved word "local".
-LUA is a language dinamically typed(that is, can take any type at some time that is assigned)
+  
+LUA is a language dinamically typed(that is, can take any type at some time that is assigned).
+
+LUA has some keywords which are the next:
+
+ and       break     do        else      elseif
+ end       false     for       function  if
+ in        local     nil       not       or
+ repeat    return    then      true      until     while
+ 
+  also have functions, wich then we will explain you, such is the case of "print"
+ 
+ Print as name its idicate its action is print somethig but into the print(), we can put the some keywords that are not found into the 
+  previous list 
+..       concatenation
+'\a'     bell                 
+'\b'     backspace            
+'\f'     form feed
+'\n'     newline
+'\r'     carriage return
+'\t'     horizontal tab
+'\v'     vertical tab
+'\\'     backslash
+'\"'     quotation mark o double quote
+'\''     apostrophe o single quote
