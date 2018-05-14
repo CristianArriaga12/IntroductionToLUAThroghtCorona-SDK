@@ -1,0 +1,46 @@
+-----------------------------------------------------------------------------------------
+--
+-- main.lua
+--
+-----------------------------------------------------------------------------------------
+
+local tapCount = 0
+
+local background = display.newImageRect( "Space.jpg", display.contentWidth, display.contentHeight )
+background.x = display.contentCenterX
+background.y = display.contentCenterY
+
+local tapText = display.newText( tapCount, display.contentCenterX, 100, native.systemFont, 100 )
+tapText:setFillColor( 0, 0, 0 )
+
+local platform = display.newImageRect( "namek.png", 1500, 1500 )
+platform.x = display.contentCenterX
+platform.y = display.contentHeight+150
+
+local balloon = display.newImageRect( "asteroide.png", 200, 200 )
+balloon.x = display.contentCenterX
+balloon.y = display.contentCenterY
+balloon.alpha = 0.8
+
+local suelo = display.newLine(0,display.contentHeight,display.contentWidth*2, display.contentHeight)
+local pared_izq = display.newLine(1,0,1,display.contentHeight*2)
+local pared_der = display.newLine(display.contentWidth-1,0,display.contentWidth-1,display.contentHeight*2)
+local techo = display.newLine(0,0,display.contentWidth*2,0)
+
+local physics = require( "physics" )
+physics.start()
+physics.setGravity(0,5)
+
+physics.addBody( suelo, "static" )
+physics.addBody( pared_izq, "static" )
+physics.addBody( pared_der, "static" )
+physics.addBody( techo, "static" )
+physics.addBody( balloon, "dynamic", { radius=50, bounce=0.3 } )
+
+local function pushBalloon()
+	balloon:applyLinearImpulse( 0, -0.75, balloon.x, balloon.y )
+	tapCount = tapCount + 1
+	tapText.text = tapCount
+end
+
+balloon:addEventListener( "tap", pushBalloon )
