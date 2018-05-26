@@ -1,8 +1,10 @@
------------------------------------------------------------------------------------------
+
 --
 -- main.lua
 --
 -----------------------------------------------------------------------------------------
+
+-- Your code here
 local physics = require( "physics" )
 physics.start()
 physics.setGravity( 0, 0 )
@@ -10,40 +12,82 @@ physics.setGravity( 0, 0 )
 -- Seed the random number generator
 math.randomseed( os.time() )
 
+-- Configure image sheet
+local sheetOptions ={
+    frames ={
+        {   -- 1) asteroid 1
+            x = 17,
+            y = 0,
+            width = 270,
+            height = 270
+        },
+        
+		{   -- 2) Millennium_Falcon
+            x = 0,
+            y = 500,
+            width = 280,
+            height = 350
+        },
+        {   -- 3) laser
+            x = 125,
+            y = 313,
+            width = 50,
+            height = 160
+        },
+		
+		{   -- 4) Namekusein
+            x = 0,
+            y = 855,
+            width = 280,
+            height = 260
+        },
+		
+    },
+}
+local objectSheet = graphics.newImageSheet( "Imagen1.png", sheetOptions )
 
+-- Initialize variables
 local lives = 3
 local score = 0
 local died = false
 
 local asteroidsTable = {}
 
-local ship
+local Namekussei
+local Millennium_Falcon
 local gameLoopTimer
 local livesText
 local scoreText
+local diedText
 
-local tapCount = 0
-local ifCount ="hola"
+-- Set up display groups
+local backGroup = display.newGroup()  -- Display group for the background image
+local mainGroup = display.newGroup()  -- Display group for the Millennium_Falcon, asteroids, lasers, etc.
+local uiGroup = display.newGroup()    -- Display group for Player points
 
-
-local background = display.newImageRect( "Space.jpg", display.contentWidth, display.contentHeight )
+-- Load the background
+local background = display.newImageRect( backGroup, "Space.jpg", display.contentWidth, display.contentHeight )
 background.x = display.contentCenterX
 background.y = display.contentCenterY
 
-local tapText = display.newText( tapCount, display.contentCenterX, 100, native.systemFont, 100 )
-tapText:setFillColor( 0, 0, 0 )
-
-local ifText = display.newText( ifCount, display.contentCenterX, 200, native.systemFont, 100 )
-tapText:setFillColor( 0, 0, 0 )
-local uiGroup = display.newGroup() 
-
-livesText = display.newText( uiGroup, "Lives: " .. lives, 200, 80, native.systemFont, 36 )
-scoreText = display.newText( uiGroup, "Score: " .. score, 400, 80, native.systemFont, 36 )
-
-local Namekussei = display.newImageRect( "namek.png", 1500, 1500 )
+Namekussei = display.newImageRect(  mainGroup, objectSheet,4, 1500, 1500 )
 Namekussei.x = display.contentCenterX
 Namekussei.y = display.contentHeight+150
+physics.addBody( Namekussei, "static", { radius=500, friction = 1.0} )
 
+--Load the Millennium_Falcon
+
+Millennium_Falcon = display.newImageRect( mainGroup, objectSheet, 2, 400, 400 )
+Millennium_Falcon.x = display.contentCenterX
+Millennium_Falcon.y = display.contentHeight - 200
+physics.addBody( Millennium_Falcon, { radius=155, isSensor=true } )
+Millennium_Falcon.myName = "Millennium_Falcon"
+
+-- Display lives and score
+livesText = display.newText( uiGroup, "Lives: " .. lives, 200, 80, native.systemFont, 80 )
+scoreText = display.newText( uiGroup, "Score: " .. score, 700, 80, native.systemFont, 80 )
+
+-- Hide the status bar
 display.setStatusBar( display.HiddenStatusBar )
 
 local function updateText()
@@ -51,14 +95,12 @@ local function updateText()
 	scoreText.text = "Score: " .. score
 end
 
-
 local function createAsteroid()
 
-	local newAsteroid = display.newImageRect( "asteroide.png", 200, 200 )
+	local newAsteroid = display.newImageRect( mainGroup, objectSheet, 1, 200, 200 )
 	table.insert( asteroidsTable, newAsteroid )
-	physics.addBody( newAsteroid, "dynamic", { radius=40, bounce=0.8 } )
+	physics.addBody( newAsteroid, "dynamic", { radius=80, bounce=0.8 } )
 	newAsteroid.myName = "asteroid"
-	
 
 	local whereFrom = math.random( 3 )
 
@@ -82,12 +124,53 @@ local function createAsteroid()
 	newAsteroid:applyTorque( math.random( -6,6 ) )
 end
 
+local function fireLaser()
+
+	local newLaser = display.newImageRect( mainGroup, objectSheet, 3, 20, 100 )
+	physics.addBody( newLaser, "dynamic", { isSensor=true } )
+	newLaser.isBullet = true
+	newLaser.myName = "laser"
+
+	newLaser.x = Millennium_Falcon.x
+	newLaser.y = Millennium_Falcon.y
+	newLaser:toBack()
+
+	transition.to( newLaser, { y=-40, time=500,
+		onComplete = function() display.remove( newLaser ) end
+	} )
+end
+
+Millennium_Falcon:addEventListener( "tap", fireLaser )
+
+local function dragMillennium_Falcon( event )
+
+	local Millennium_Falcon = event.target
+	local phase = event.phase
+
+	if ( "began" == phase ) then
+		-- Set touch focus on the Millennium_Falcon
+		display.currentStage:setFocus( Millennium_Falcon )
+		-- Store initial offset position
+		Millennium_Falcon.touchOffsetX = event.x - Millennium_Falcon.x
+
+	elseif ( "moved" == phase ) then
+		-- Move the Millennium_Falcon to the new touch position
+		Millennium_Falcon.x = event.x - Millennium_Falcon.touchOffsetX
+
+	elseif ( "ended" == phase or "cancelled" == phase ) then
+		-- Release touch focus on the Millennium_Falcon
+		display.currentStage:setFocus( nil )
+	end
+
+	return true  -- Prevents touch propagation to underlying objects
+end
+
+Millennium_Falcon:addEventListener( "touch", dragMillennium_Falcon )
+
 local function gameLoop()
 
 	-- Create new asteroid
 	createAsteroid()
-	
-	
 
 	-- Remove asteroids which have drifted off screen
 	for i = #asteroidsTable, 1, -1 do
@@ -104,56 +187,71 @@ local function gameLoop()
 	end
 end
 
-gameLoopTimer = timer.performWithDelay( 50, gameLoop, 1 )
+gameLoopTimer = timer.performWithDelay( 1500, gameLoop, 0 )
 
--- physics.setDrawMode("hybrid")
+local function restoreMillennium_Falcon()
 
---physics.addBody( suelo, "static", {friction=1.0})
---physics.addBody( pared_izq, "static" , {friction=1.0})
---physics.addBody( pared_der, "static", {friction=1.0})
---physics.addBody( techo, "static", {friction=1.0})
-physics.addBody( Namekussei, "static", { radius=430, friction = 1.0} )
+	Millennium_Falcon.isBodyActive = false
+	Millennium_Falcon.x = display.contentCenterX
+	Millennium_Falcon.y = display.contentHeight - 200
 
-
-
-
-local function pushAsteroid(event)
---print("Si entre al listener")
-	--if (event.phase == "began") then
-	--print("El evento ha comenzado")
-		local obj1 = event.object1
-		
-		--if(obj1.myName=="asteroid") then
-		--obj1:applyLinearImpulse( 0, -0.75, event.x, event.y )
-		tapCount = tapCount + 1
-		if tapCount == 5 then
-			print("Ya destruiste el asteriode")
-			ifCount = "Booom"
-			display.remove( obj1 )
-			
-
-			-- Increase score
-			
+	-- Fade in the Millennium_Falcon
+	transition.to( Millennium_Falcon, { alpha=1, time=4000,
+		onComplete = function()
+			Millennium_Falcon.isBodyActive = true
+			died = false
 		end
-		score = score + 100
-		scoreText.text = "Score: " .. score
-		tapText.text = tapCount
-	--end
+	} )
 end
 
-Runtime:addEventListener( "tap", pushAsteroid )
+local function onCollision( event )
 
+	if ( event.phase == "began" ) then
 
---local function addAsteroid()
---	asteroid = display.newImageRect( "asteroide.png", 200, 200 )
---	asteroid.x = math.random(1000)
---	asteroid.y = 10
---	asteroid.rotation = 1
---	physics.addBody(asteroid, "dynamic",{radius=70, bounce=0.5, friction=1.0})
---	asteroid:addEventListener( "tap", pushAsteroid )
-	
---end
+		local obj1 = event.object1
+		local obj2 = event.object2
 
---timer.performWithDelay(999,addAsteroid, 5)
+		if ( ( obj1.myName == "laser" and obj2.myName == "asteroid" ) or
+			 ( obj1.myName == "asteroid" and obj2.myName == "laser" ) )
+		then
+			-- Remove both the laser and asteroid
+			display.remove( obj1 )
+			display.remove( obj2 )
 
+			for i = #asteroidsTable, 1, -1 do
+				if ( asteroidsTable[i] == obj1 or asteroidsTable[i] == obj2 ) then
+					table.remove( asteroidsTable, i )
+					break
+				end
+			end
 
+			-- Increase score
+			score = score + 100
+			scoreText.text = "Score: " .. score
+
+		elseif ( ( obj1.myName == "Millennium_Falcon" and obj2.myName == "asteroid" ) or
+				 ( obj1.myName == "asteroid" and obj2.myName == "Millennium_Falcon" ) )
+		then
+			if ( died == false ) then
+				died = true
+
+				-- Update lives
+				lives = lives - 1
+				livesText.text = "Lives: " .. lives
+
+				if ( lives == 0 ) then
+					display.remove( Millennium_Falcon )
+					diedText = display.newText( uiGroup, "You Lost: " .. score, display.contentCenterX, display.contentCenterY, native.systemFont, 150 )
+					diedText:setFillColor( 1, 0, 0 )
+				else
+					Millennium_Falcon.alpha = 0
+					timer.performWithDelay( 1000, restoreMillennium_Falcon )
+				end
+			end
+		end
+	end
+end
+
+Runtime:addEventListener( "collision", onCollision )
+
+-- physics.setDrawMode("hybrid")
